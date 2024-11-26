@@ -1,21 +1,34 @@
 var crc;
 var draw;
 var group;
-var radius = 150;
-var segmentCount = 2;
+var radius = 300;
+var segmentCount = 9;
 var rotation = 0;
 const rotationVelocity = 1
 const width = 300;
 const height = 300;
+const crcXTrans = 0;
+const crcYTrans = 0;
 
 SVG.on(document, 'DOMContentLoaded', async function() {
     let svg = SVG();
     draw = svg.addTo('#canvas').size(width, height)
-    crc = draw.circle(radius).move(width/2, height/2).fill('#f06');
+    crc = draw.circle(radius).move(crcXTrans, crcYTrans).fill('#f06');
     drawSegments();
-    await update()
+    //await update()
 })
 
+async function spin() {
+    let rotate = Math.random() * (2000 - 1000) + 2000 
+    group.animate({
+        duration: 2000,
+        delay: 0,
+        when: 'now',
+        swing: false,
+        times: 1,
+        wait: 0
+    }).rotate(rotate)
+}
 async function update() {
     while(true){ 
         await new Promise(r => setTimeout(r, 1000/60));
@@ -25,10 +38,14 @@ async function update() {
 function drawSegments() {
     let angle = 360 / segmentCount;
     group = draw.group().attr({
-        transform:`translate(${width/2 + radius/2},${height/2 + radius/2})`,
+        transform:`translate(${crcXTrans + radius/2},${crcYTrans + radius/2})`,
         stroke:"#fff",
         "stroke-width":"2"
     })
+    group.rect(radius * 2, radius * 2).attr({
+        transform: `translate(${-radius}, ${-radius})`,
+        opacity: 0
+    });
     for (i = 0; i < segmentCount; i++){
         let x = radius / 2
         let y = 0

@@ -9,8 +9,9 @@
         <div id="canvas"></div>
         <?php
 
-            echo "hellow"
         ?>
-        
+        <button onClick="spin()">
+            hellow
+        </button>        
     </body>
 </html>
