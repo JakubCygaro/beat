@@ -13,5 +13,13 @@
         <button onClick="spin()">
             hellow
         </button>        
+        <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+        <form  action="javascript:void(0);" onsubmit="addItem()">
+            <label for="new-item">Add:</label>
+            <input type="text" id="new-item"></input>
+            <input type="submit" id="add-item-button"></input>
+        </form>
+        <ul>
+        </ul>
     </body>
 </html>

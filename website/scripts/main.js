@@ -4,6 +4,7 @@ var group;
 var radius = 300;
 var segmentCount = 9;
 var rotation = 0;
+var items = []
 const rotationVelocity = 1
 const width = 300;
 const height = 300;
@@ -50,16 +51,30 @@ function drawSegments() {
         let x = radius / 2
         let y = 0
         let thisAngle = degreesToRadians(angle * i)
-        console.log(`x: ${x} y: ${y} thisAngle: ${thisAngle}`)
+        //console.log(`x: ${x} y: ${y} thisAngle: ${thisAngle}`)
         let angleOffsetX = (x * Math.cos(thisAngle)) - (y * Math.sin(thisAngle))
         let angleOffsetY = (y * Math.cos(thisAngle)) + (x * Math.sin(thisAngle))
 
-        console.log(`x: ${x} y: ${y} angleOX: ${angleOffsetX} angleOY: ${angleOffsetY}`)
+        //console.log(`x: ${x} y: ${y} angleOX: ${angleOffsetX} angleOY: ${angleOffsetY}`)
         group.path(`M0 0 ${angleOffsetX},${angleOffsetY}`).fill('#fff')
     }
 }
+
+function addItem() {
+    let item = document.getElementById('new-item').value.toString()
+    items.push(item)
+    console.log(items)
+}
+
+function drawItems() {
+    for (const item of items) {
+        
+    }
+}
+
 function degreesToRadians(degrees)
 {
     var pi = Math.PI;
     return degrees * (pi/180);
 }
+
