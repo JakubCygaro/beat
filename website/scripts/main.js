@@ -2,7 +2,7 @@ var crc;
 var draw;
 var group;
 var radius = 300;
-var segmentCount = 9;
+var segmentCount = 4;
 var rotation = 0;
 var items = []
 const rotationVelocity = 1
@@ -20,7 +20,7 @@ SVG.on(document, 'DOMContentLoaded', async function() {
 })
 
 async function spin() {
-    let rotate = Math.random() * (2000 - 1000) + 2000 
+    let rotate = Math.random() * (1500 - 1000) + 1500 
     group.animate({
         duration: 2000,
         delay: 0,
