@@ -71,31 +71,40 @@ function drawSegments() {
         let angleOffsetY = (y * Math.cos(thisAngle)) + (x * Math.sin(thisAngle))
 
         //console.log(`x: ${x} y: ${y} angleOX: ${angleOffsetX} angleOY: ${angleOffsetY}`)
-        let path = `M0 0 ${angleOffsetX},${angleOffsetY}`
         console.log(`item: ${items[i]}`)
-        //let text = group.text(items[i])
-        //text.path(path)
-        //    .font({ 
-        //        size: 20.5, 
-        //        family: 'Arial' 
-        //    })
-        //    .attr({
-        //        startOffset:"50%",
-        //        "text-anchor":"middle"
-        //    })
-        //group.path(path).attr({
-        //    stroke:'#00ff00'
-        //})
         let text = group.text(items[i])
-                        .font({
-                            size: 20,
-                            family: 'Arial'
-                        })
-                        .attr({
-                            transform: `translate(${angleOffsetX}, ${angleOffsetY})`,
-                            startOffset:"50%",
-                            "text-anchor":"middle"
-                        })
+        let angle90 = degreesToRadians(90)
+        perpX = (angleOffsetX  * Math.cos(angle90)) - (angleOffsetY  * Math.sin(angle90))
+        perpY = (angleOffsetY  * Math.cos(angle90)) + (angleOffsetX   * Math.sin(angle90))
+        let normalizedPerpendiciular = normalizeVector({
+            x: perpX,
+            y: perpY,
+        });
+        let path = `M${normalizedPerpendiciular.x * 10} ${normalizedPerpendiciular.y * 10} ${angleOffsetX + normalizedPerpendiciular.x * 10},${angleOffsetY + normalizedPerpendiciular.y * 10}`
+        group.path(path).attr({
+            stroke:'#00ff00',
+            transform:`translate(${normalizedPerpendiciular.x * 20},${normalizedPerpendiciular.y * 20})` 
+        })
+        text.path(path)
+            .font({ 
+                size: 20.5, 
+                family: 'Arial' 
+            })
+            .attr({
+                startOffset:"50%",
+                "text-anchor":"middle",
+                side: "right"
+            })
+        //let text = group.text(items[i])
+        //                .font({
+        //                    size: 20,
+        //                    family: 'Arial'
+        //                })
+        //                .attr({
+        //                    transform: `translate(${angleOffsetX}, ${angleOffsetY})`,
+        //                    startOffset:"50%",
+        //                    "text-anchor":"middle"
+        //                })
     }
 }
 
@@ -125,4 +134,30 @@ function degreesToRadians(degrees)
     var pi = Math.PI;
     return degrees * (pi/180);
 }
-
+function normalizeVector(vector) {
+    let magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y)
+    return {
+        x: vector.x / magnitude,
+        y: vector.y / magnitude
+    }
+}
+function dotProduct(v1, v2) {
+    return v1.x * v2.x + v1.y * v2.y
+}
+function perpendiciularVector(vector) {
+    let e;
+    let dot;
+    do {
+        e = {
+            x: -Math.random(),
+            y: Math.random()
+        }
+        e = normalizeVector(e)
+        dot = dotProduct(e, vector)
+    } while(dot >= 0.5)
+    let tmp = dotProduct(dotProduct(e, vector), vector)
+    return {
+        x: e.x - tmp,
+        y: e.y - tmp
+    }
+}
