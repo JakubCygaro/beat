@@ -2,9 +2,9 @@ var crc;
 var draw;
 var group;
 var radius = 300;
-var segmentCount = 4;
+var segmentCount = 0;
 var rotation = 0;
-var items = ["dupa", "siupa"]
+var items = []//["dupa", "siupa"]
 const rotationVelocity = 1
 const width = 300;
 const height = 300;
@@ -22,6 +22,8 @@ SVG.on(document, 'DOMContentLoaded', async function() {
         stroke:"#fff",
         "stroke-width":"2"
     })
+    addItem("dupa")
+    addItem("siupa")
     drawSegments();
     //await update()
 })
@@ -120,6 +122,7 @@ function addItem(text) {
         let span = document.createElement('span')
         let li = document.createElement('li')
         li.classList = "item"
+        span.classList = "value"
         span.textContent = item
         button.dataset.action = 'delete'
         button.textContent = "Remove"
@@ -127,12 +130,22 @@ function addItem(text) {
         li.appendChild(button)
         itemList.appendChild(li)
         button.addEventListener("click", onDelete);
+        drawSegments()
     }
     console.log(items)
 }
 function onDelete(e) {
     if (e.target.dataset.action === 'delete') {
-        e.target.closest('.item').remove();
+        let item = e.target.closest('.item')
+        let toDelete = item.firstChild.textContent;
+        console.log(toDelete)
+        let idx = items.indexOf(toDelete);
+        console.log(idx)
+        if(idx >= 0) {
+            items.splice(idx, 1);
+            drawSegments();
+        }
+        item.remove();
     }
 }
 function degreesToRadians(degrees)
