@@ -115,11 +115,26 @@ function addItem(text) {
     if (item !== "") {
         items.push(item)
         segmentCount = items.length
-        drawSegments()
+        let itemList = document.getElementById('item-list')
+        let button = document.createElement('button')
+        let span = document.createElement('span')
+        let li = document.createElement('li')
+        li.classList = "item"
+        span.textContent = item
+        button.dataset.action = 'delete'
+        button.textContent = "Remove"
+        li.appendChild(span)
+        li.appendChild(button)
+        itemList.appendChild(li)
+        button.addEventListener("click", onDelete);
     }
     console.log(items)
 }
-
+function onDelete(e) {
+    if (e.target.dataset.action === 'delete') {
+        e.target.closest('.item').remove();
+    }
+}
 function degreesToRadians(degrees)
 {
     var pi = Math.PI;

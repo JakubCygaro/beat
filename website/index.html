@@ -7,18 +7,15 @@
     </head>
     <body>
         <div id="canvas"></div>
-        <?php
-
-        ?>
         <button onClick="spin()">
-            hellow
+            Spin
         </button>        
         <form  action="javascript:void(0);" onsubmit="addItem()">
             <label for="new-item">Add:</label>
             <input type="text" id="new-item"></input>
-            <input type="submit" id="add-item-button"></input>
+            <input type="submit" id="add-item-button" value="Add"></input>
         </form>
-        <ul>
+        <ul id="item-list">
         </ul>
     </body>
 </html>
