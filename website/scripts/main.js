@@ -5,9 +5,10 @@ var radius = 300;
 var segmentCount = 0;
 var rotation = 0;
 var items = []//["dupa", "siupa"]
+var reRotate = null
 const rotationVelocity = 1
-const width = 300;
-const height = 300;
+const WIDTH = 300;
+const HEIGHT = 300;
 const crcXTrans = 0;
 const crcYTrans = 0;
 
@@ -15,7 +16,7 @@ const DISPLAY_DEBUG = false;
 
 SVG.on(document, 'DOMContentLoaded', async function() {
     let svg = SVG();
-    draw = svg.addTo('#canvas').size(width, height)
+    draw = svg.addTo('#canvas').size(WIDTH, HEIGHT)
     crc = draw.circle(radius).move(crcXTrans, crcYTrans).fill('#f06');
     group = draw.group().attr({
         transform:`translate(${crcXTrans + radius/2},${crcYTrans + radius/2})`,
@@ -29,21 +30,30 @@ SVG.on(document, 'DOMContentLoaded', async function() {
 })
 
 async function spin() {
-    let rotate = Math.random() * (1500 - 1000) + 1500 
+    if (reRotate) {
+        console.log(reRotate)
+        group.rotate(-reRotate)
+    }
+    let spinDuration = 2000;
+    let rotate = Math.random() * (2000 - 1000) + 1000 
     group.animate({
-        duration: 2000,
+        duration: spinDuration,
         delay: 0,
         when: 'now',
         swing: false,
         times: 1,
         wait: 0
     }).rotate(rotate)
-}
-async function update() {
-    while(true){ 
-        await new Promise(r => setTimeout(r, 1000/60));
-        group.rotate(2);
-    }
+    reRotate = rotate
+    console.log(rotate)
+    await new Promise(r => setTimeout(r, spinDuration));
+    let segmentSize = (360 / segmentCount)
+    let segm = rotate % 360
+    console.log(segmentSize)
+    console.log(segm)
+    segm = Math.floor(segm / (360 / segmentCount))
+    console.log(segm)
+    alert(items[segm])
 }
 function drawSegments() {
     segmentCount = items.length
@@ -92,7 +102,7 @@ function drawSegments() {
                 stroke:'#00ff00',
             })
         console.log(`item: ${items[i]}`)
-        let text = group
+        group
             .text(items[i])
             .path(path)
             .font({ 
