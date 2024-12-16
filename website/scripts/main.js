@@ -33,6 +33,8 @@ async function spin() {
     if (reRotate) {
         console.log(reRotate)
         group.rotate(-reRotate)
+        await new Promise(r => setTimeout(r, 500));
+        //return;
     }
     let spinDuration = 2000;
     let rotate = Math.random() * (2000 - 1000) + 1000 
@@ -48,7 +50,7 @@ async function spin() {
     console.log(rotate)
     await new Promise(r => setTimeout(r, spinDuration));
     let segmentSize = (360 / segmentCount)
-    let segm = rotate % 360
+    let segm = ((rotate + (segmentSize / 2)) % 360) // + (segmentSize / 2)
     console.log(segmentSize)
     console.log(segm)
     segm = Math.floor(segm / (360 / segmentCount))
@@ -69,31 +71,34 @@ function drawSegments() {
         opacity: hackBoxOpacity
     });
     for (i = 0; i < segmentCount; i++){
-        let x = radius / 2
-        let y = 0
-        let thisAngle = degreesToRadians(angle * i)
+        let x = 0 
+        let y = -radius / 2
         //console.log(`x: ${x} y: ${y} thisAngle: ${thisAngle}`)
-        let angleOffsetX = (x * Math.cos(thisAngle)) - (y * Math.sin(thisAngle))
-        let angleOffsetY = (y * Math.cos(thisAngle)) + (x * Math.sin(thisAngle))
+        //let angleOffsetX = (x * Math.cos(thisAngle)) - (y * Math.sin(thisAngle))
+        //let angleOffsetY = (y * Math.cos(thisAngle)) + (x * Math.sin(thisAngle))
 
+        let thisAngle = degreesToRadians(angle * i)
+        let rotated = rotateVector({x: x, y: y}, thisAngle);
         //console.log(`x: ${x} y: ${y} angleOX: ${angleOffsetX} angleOY: ${angleOffsetY}`)
-        group.path(`M0 0 ${angleOffsetX},${angleOffsetY}`).fill('#fff')
+        group.path(`M0 0 ${rotated.x},${rotated.y}`).fill('#fff')
     }
     for (i = 0; i < segmentCount; i++){
-        let x = radius / 2
-        let y = 0
+        let x = 0 
+        let y = -radius / 2
         let thisAngle = degreesToRadians((angle * i) + angle / 2)
-        let angleOffsetX = (x * Math.cos(thisAngle)) - (y * Math.sin(thisAngle))
-        let angleOffsetY = (y * Math.cos(thisAngle)) + (x * Math.sin(thisAngle))
+        let rotated = rotateVector({x: x, y: y}, thisAngle);
+        let angleOffsetX = rotated.x 
+        let angleOffsetY = rotated.y 
         if(DISPLAY_DEBUG)
             group.path(`M0 0 ${angleOffsetX},${angleOffsetY}`).fill('#AAAA00')
 
         let angle90 = degreesToRadians(90)
-        perpX = (angleOffsetX  * Math.cos(angle90)) - (angleOffsetY  * Math.sin(angle90))
-        perpY = (angleOffsetY  * Math.cos(angle90)) + (angleOffsetX   * Math.sin(angle90))
+        rotated = rotateVector(rotated, angle90);
+        //perpX = (angleOffsetX  * Math.cos(angle90)) - (angleOffsetY  * Math.sin(angle90))
+        //perpY = (angleOffsetY  * Math.cos(angle90)) + (angleOffsetX   * Math.sin(angle90))
         let normalizedPerpendiciular = normalizeVector({
-            x: perpX,
-            y: perpY,
+            x: rotated.x,
+            y: rotated.y,
         });
         let moveFactor = -20.5;
         let path = `M${normalizedPerpendiciular.x * moveFactor} ${normalizedPerpendiciular.y * moveFactor} ${angleOffsetX + normalizedPerpendiciular.x * moveFactor},${angleOffsetY + normalizedPerpendiciular.y * moveFactor}`
@@ -189,5 +194,13 @@ function perpendiciularVector(vector) {
     return {
         x: e.x - tmp,
         y: e.y - tmp
+    }
+}
+function rotateVector(vec2, theta) {
+    let angleOffsetX = (vec2.x * Math.cos(theta)) - (vec2.y * Math.sin(theta))
+    let angleOffsetY = (vec2.y * Math.cos(theta)) + (vec2.x * Math.sin(theta))
+    return {
+        x: angleOffsetX,
+        y: angleOffsetY
     }
 }
