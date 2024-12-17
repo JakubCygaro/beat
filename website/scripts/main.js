@@ -5,7 +5,7 @@ var radius = 300;
 var segmentCount = 0;
 var rotation = 0;
 var items = []//["dupa", "siupa"]
-var reRotate = false
+var reRotate = null
 const rotationVelocity = 1
 const WIDTH = 300;
 const HEIGHT = 300;
@@ -30,18 +30,27 @@ SVG.on(document, 'DOMContentLoaded', async function() {
 })
 
 async function spin() {
-    if (reRotate) {
+    if (reRotate != null) {
         console.log(reRotate)
         //group.rotate(-reRotate)
-        group.attr({
-            transform:`rotate(0) translate(${crcXTrans + radius/2},${crcYTrans + radius/2}) `,
-            stroke:"#fff",
-            "stroke-width":"2"
-        })
+        //group.attr({
+        //    transform:`rotate(${reRotate}) translate(${crcXTrans + radius/2},${crcYTrans + radius/2}) `,
+        //    stroke:"#fff",
+        //    "stroke-width":"2"
+        //})
+
+        group.animate({
+            duration: 500,
+            delay: 0,
+            when: 'now',
+            swing: false,
+            times: 1,
+            wait: 0
+        }).rotate(reRotate)
         await new Promise(r => setTimeout(r, 500));
         //return;
-    }
-    let spinDuration = 2000;
+    } 
+    let spinDuration = 1000 * 10;
     //let rotate = Math.random() * (2000 - 1000) + 1000 
     let rotate = Math.random() * (360)
     group.animate({
@@ -53,11 +62,13 @@ async function spin() {
         wait: 0
     }).rotate(rotate)
 
-    reRotate = true
+    reRotate = -rotate
     console.log(rotate)
     await new Promise(r => setTimeout(r, spinDuration));
     let segmentSize = (360 / segmentCount)
     let segm = ((rotate) % 360) // + (segmentSize / 2)
+    console.log(`segm: ${segm}`)
+    segm = 360 - segm
     console.log(`segmentSize: ${segmentSize}`)
     console.log(`segm: ${segm}`)
     segm = Math.floor(segm / segmentSize)
