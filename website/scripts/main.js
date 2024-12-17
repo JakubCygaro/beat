@@ -66,7 +66,7 @@ async function spin() {
     console.log(rotate)
     await new Promise(r => setTimeout(r, spinDuration));
     let segmentSize = (360 / segmentCount)
-    let segm = ((rotate) % 360) // + (segmentSize / 2)
+    let segm = ((rotate + 180) % 360) // + (segmentSize / 2)
     console.log(`segm: ${segm}`)
     segm = 360 - segm
     console.log(`segmentSize: ${segmentSize}`)
