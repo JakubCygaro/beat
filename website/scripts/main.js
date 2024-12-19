@@ -1,44 +1,43 @@
 var crc;
-var draw;
+var canvas;
 var group;
-var radius = 300;
+var diameter = 300;
 var segmentCount = 0;
 var rotation = 0;
-var items = []//["dupa", "siupa"]
+var items = []
 var reRotate = null
+var spinning = false;
 const rotationVelocity = 1
-const WIDTH = 300;
-const HEIGHT = 300;
+const WIDTH = 400;
+const HEIGHT = 400;
 const crcXTrans = 0;
 const crcYTrans = 0;
-
+const ARROW_DEGREE = -90;
 const DISPLAY_DEBUG = false;
+const COLOR_PALETTE = ['darkred', 'darkgreen', 'darkblue', 'orange', 'purple', 'gray', 'purple']
 
 SVG.on(document, 'DOMContentLoaded', async function() {
     let svg = SVG();
-    draw = svg.addTo('#canvas').size(WIDTH, HEIGHT)
-    crc = draw.circle(radius).move(crcXTrans, crcYTrans).fill('#f06');
-    group = draw.group().attr({
-        transform:`translate(${crcXTrans + radius/2},${crcYTrans + radius/2})`,
+    canvas = svg.addTo('#canvas').size(WIDTH, HEIGHT)
+    crc = canvas.circle(diameter).move(crcXTrans, crcYTrans).fill('#f06');
+    group = canvas.group().attr({
+        transform:`translate(${crcXTrans + diameter/2},${crcYTrans + diameter/2})`,
         stroke:"#fff",
         "stroke-width":"2"
     })
     addItem("dupa")
     addItem("siupa")
     drawSegments();
-    //await update()
 })
 
 async function spin() {
+    if(spinning){
+        return;
+    } else {
+        spinning = true;
+    }
     if (reRotate != null) {
-        console.log(reRotate)
-        //group.rotate(-reRotate)
-        //group.attr({
-        //    transform:`rotate(${reRotate}) translate(${crcXTrans + radius/2},${crcYTrans + radius/2}) `,
-        //    stroke:"#fff",
-        //    "stroke-width":"2"
-        //})
-
+        //console.log(reRotate)
         group.animate({
             duration: 500,
             delay: 0,
@@ -47,12 +46,10 @@ async function spin() {
             times: 1,
             wait: 0
         }).rotate(reRotate)
-        await new Promise(r => setTimeout(r, 500));
-        //return;
+        await new Promise(r => setTimeout(r, 1000));
     } 
-    let spinDuration = 1000 * 10;
-    //let rotate = Math.random() * (2000 - 1000) + 1000 
-    let rotate = Math.random() * (360)
+    let spinDuration = 1000 * 3;
+    let rotate = Math.random() * (2000 - 1000) + 1000 
     group.animate({
         duration: spinDuration,
         delay: 0,
@@ -63,46 +60,60 @@ async function spin() {
     }).rotate(rotate)
 
     reRotate = -rotate
-    console.log(rotate)
+    //console.log(rotate)
     await new Promise(r => setTimeout(r, spinDuration));
     let segmentSize = (360 / segmentCount)
-    let segm = ((rotate + 180) % 360) // + (segmentSize / 2)
-    console.log(`segm: ${segm}`)
+    let segm = ((rotate + ARROW_DEGREE) % 360) 
+    //console.log(`segm: ${segm}`)
     segm = 360 - segm
-    console.log(`segmentSize: ${segmentSize}`)
-    console.log(`segm: ${segm}`)
+    //console.log(`segmentSize: ${segmentSize}`)
+    //console.log(`segm: ${segm}`)
     segm = Math.floor(segm / segmentSize)
-    console.log(`segm: ${segm}`)
+    //console.log(`segm: ${segm}`)
     alert(items[segm])
+    spinning = false;
 }
 function drawSegments() {
     segmentCount = items.length
     let angle = 360 / segmentCount;
     group.clear()
     let hackBoxOpacity;
-    //if (DISPLAY_DEBUG)
-    //    hackBoxOpacity = 10;
-    //else
     hackBoxOpacity = 0;
-    group.rect(radius * 2, radius * 2).attr({
-        transform: `translate(${-radius}, ${-radius})`,
+    group.rect(diameter * 2, diameter * 2).attr({
+        transform: `translate(${-diameter}, ${-diameter})`,
         opacity: hackBoxOpacity
     });
-    for (i = 0; i < segmentCount; i++){
+    let lastSegm = {
+        x: 0,
+        y: -diameter / 2
+    }
+    for (i = 0; i <= segmentCount; i++){
         let x = 0 
-        let y = -radius / 2
-        //console.log(`x: ${x} y: ${y} thisAngle: ${thisAngle}`)
-        //let angleOffsetX = (x * Math.cos(thisAngle)) - (y * Math.sin(thisAngle))
-        //let angleOffsetY = (y * Math.cos(thisAngle)) + (x * Math.sin(thisAngle))
-
+        let y = -diameter / 2
         let thisAngle = degreesToRadians(angle * i)
         let rotated = rotateVector({x: x, y: y}, thisAngle);
-        //console.log(`x: ${x} y: ${y} angleOX: ${angleOffsetX} angleOY: ${angleOffsetY}`)
-        group.path(`M0 0 ${rotated.x},${rotated.y}`).fill('#fff')
+        if (lastSegm){
+            // if the segment count is even i need at least 2 unique colors
+            // but if it is odd i need at least 3
+            let range = segmentCount % 2 === 0 ?
+                        COLOR_PALETTE.length % 2 === 0 ?
+                            COLOR_PALETTE.length :
+                            COLOR_PALETTE.length - 1
+                        :
+                        COLOR_PALETTE.length % 2 === 0 ?
+                            COLOR_PALETTE.length - 1 :
+                            COLOR_PALETTE.length ;
+            console.log(`segmentCount: ${segmentCount}\nrange: ${range}`)
+            group.path(`M0 0 L ${lastSegm.x} ${lastSegm.y} A ${diameter / 2} ${diameter / 2} 0 0 1 ${rotated.x} ${rotated.y} Z`)
+                .fill(COLOR_PALETTE[(i) % (
+                    range
+                )])
+        }
+        lastSegm = rotated;
     }
     for (i = 0; i < segmentCount; i++){
         let x = 0 
-        let y = -radius / 2
+        let y = -diameter / 2
         let thisAngle = degreesToRadians((angle * i) + angle / 2)
         let rotated = rotateVector({x: x, y: y}, thisAngle);
         let angleOffsetX = rotated.x 
@@ -124,20 +135,27 @@ function drawSegments() {
             group.path(path).attr({
                 stroke:'#00ff00',
             })
-        console.log(`item: ${items[i]}`)
+        //console.log(`item: ${items[i]}`)
         group
             .text(items[i])
+            .attr({
+            })
             .path(path)
             .font({ 
                 size: -moveFactor, 
-                family: 'Arial' 
+                family: 'Arial' ,
             })
             .attr({
+                "text-color": 'yellow',
                 startOffset:"50%",
                 "text-anchor":"middle",
-                side: "left"
+                side: "left",
+                stroke: 'white'
             })
     }
+    let arrow = canvas.polygon('0,0 15,10 15,-10')
+    arrow.fill('#000000')    
+    arrow.move(crcXTrans + diameter, crcYTrans + diameter / 2 - 10)
 }
 
 function addItem(text) {
@@ -165,15 +183,15 @@ function addItem(text) {
         button.addEventListener("click", onDelete);
         drawSegments()
     }
-    console.log(items)
+    //console.log(items)
 }
 function onDelete(e) {
     if (e.target.dataset.action === 'delete') {
         let item = e.target.closest('.item')
         let toDelete = item.firstChild.textContent;
-        console.log(toDelete)
+        //console.log(toDelete)
         let idx = items.indexOf(toDelete);
-        console.log(idx)
+        //console.log(idx)
         if(idx >= 0) {
             items.splice(idx, 1);
             drawSegments();
