@@ -148,8 +148,9 @@ function drawSegments() {
                 x: rotated.x,
                 y: rotated.y,
             });
-            let moveFactor = -20.5;
-            let path = `M${normalizedPerpendiciular.x * moveFactor} ${normalizedPerpendiciular.y * moveFactor} ${angleOffsetX + normalizedPerpendiciular.x * moveFactor},${angleOffsetY + normalizedPerpendiciular.y * moveFactor}`
+            let moveFactor = -30.5 + segmentCount * 0.5;
+            let path = `M${normalizedPerpendiciular.x * moveFactor} ${normalizedPerpendiciular.y * moveFactor}`+
+                ` ${angleOffsetX + normalizedPerpendiciular.x * moveFactor},${angleOffsetY + normalizedPerpendiciular.y * moveFactor}`
             if (DISPLAY_DEBUG)
                 group.path(path).attr({
                     stroke:'#00ff00',
@@ -168,8 +169,9 @@ function drawSegments() {
                     "text-color": 'yellow',
                     startOffset:"50%",
                     "text-anchor":"middle",
-                    side: "left",
-                    stroke: 'white'
+                    side: "end",
+                    stroke: 'white',
+                    fill: 'white'
                 })
         }
     }
