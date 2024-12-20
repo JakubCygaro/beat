@@ -1,37 +1,45 @@
-var crc;
-var canvas;
-var group;
-var diameter = 300;
-var segmentCount = 0;
-var rotation = 0;
-var items = []
-var reRotate = null
-var spinning = false;
-const rotationVelocity = 1
-const WIDTH = 400;
-const HEIGHT = 400;
-const crcXTrans = 0;
-const crcYTrans = 0;
+const DIAMETER = 550;
+const WIDTH = 600;
+const HEIGHT = 600;
+const CRC_X_TRANS = WIDTH / 2 - DIAMETER / 2;
+const CRC_Y_TRANS = HEIGHT / 2 - DIAMETER / 2;
 const ARROW_DEGREE = -90;
 const DISPLAY_DEBUG = false;
 const COLOR_PALETTE = ['darkred', 'darkgreen', 'darkblue', 'orange', 'purple', 'gray', 'purple']
+var crc;
+var canvas;
+var group;
+var segmentCount = 0;
+var rotation = 0;
+var items = [];
+var reRotate = null;
+var spinning = false;
+var inputArea;
+
 
 SVG.on(document, 'DOMContentLoaded', async function() {
     let svg = SVG();
     canvas = svg.addTo('#canvas').size(WIDTH, HEIGHT)
-    crc = canvas.circle(diameter).move(crcXTrans, crcYTrans).fill('#f06');
+    crc = canvas.circle(DIAMETER).move(CRC_X_TRANS, CRC_Y_TRANS).fill(COLOR_PALETTE[0]);
     group = canvas.group().attr({
-        transform:`translate(${crcXTrans + diameter/2},${crcYTrans + diameter/2})`,
+        transform:`translate(${CRC_X_TRANS + DIAMETER/2},${CRC_Y_TRANS + DIAMETER/2})`,
         stroke:"#fff",
         "stroke-width":"2"
     })
-    addItem("dupa")
-    addItem("siupa")
+    inputArea = document.getElementById('input-area')
+
+    if (inputArea.addEventListener) {
+      inputArea.addEventListener('input', inputAreaChange, false);
+    } else if (inputArea.attachEvent) {
+      inputArea.attachEvent('onpropertychange', inputAreaChange);
+    }
+    //addItem("dupa")
+    //addItem("siupa")
     drawSegments();
 })
 
 async function spin() {
-    if(spinning){
+    if(spinning || segmentCount <= 0){
         return;
     } else {
         spinning = true;
@@ -79,83 +87,101 @@ function drawSegments() {
     group.clear()
     let hackBoxOpacity;
     hackBoxOpacity = 0;
-    group.rect(diameter * 2, diameter * 2).attr({
-        transform: `translate(${-diameter}, ${-diameter})`,
+    group.rect(DIAMETER * 2, DIAMETER * 2).attr({
+        transform: `translate(${-DIAMETER}, ${-DIAMETER})`,
         opacity: hackBoxOpacity
     });
-    let lastSegm = {
-        x: 0,
-        y: -diameter / 2
-    }
-    for (i = 0; i <= segmentCount; i++){
-        let x = 0 
-        let y = -diameter / 2
-        let thisAngle = degreesToRadians(angle * i)
-        let rotated = rotateVector({x: x, y: y}, thisAngle);
-        if (lastSegm){
-            // if the segment count is even i need at least 2 unique colors
-            // but if it is odd i need at least 3
-            let range = segmentCount % 2 === 0 ?
-                        COLOR_PALETTE.length % 2 === 0 ?
-                            COLOR_PALETTE.length :
-                            COLOR_PALETTE.length - 1
-                        :
-                        COLOR_PALETTE.length % 2 === 0 ?
-                            COLOR_PALETTE.length - 1 :
-                            COLOR_PALETTE.length ;
-            console.log(`segmentCount: ${segmentCount}\nrange: ${range}`)
-            group.path(`M0 0 L ${lastSegm.x} ${lastSegm.y} A ${diameter / 2} ${diameter / 2} 0 0 1 ${rotated.x} ${rotated.y} Z`)
-                .fill(COLOR_PALETTE[(i) % (
-                    range
-                )])
-        }
-        lastSegm = rotated;
-    }
-    for (i = 0; i < segmentCount; i++){
-        let x = 0 
-        let y = -diameter / 2
-        let thisAngle = degreesToRadians((angle * i) + angle / 2)
-        let rotated = rotateVector({x: x, y: y}, thisAngle);
-        let angleOffsetX = rotated.x 
-        let angleOffsetY = rotated.y 
-        if(DISPLAY_DEBUG)
-            group.path(`M0 0 ${angleOffsetX},${angleOffsetY}`).fill('#AAAA00')
+    if (segmentCount > 0){
 
-        let angle90 = degreesToRadians(90)
-        rotated = rotateVector(rotated, angle90);
-        //perpX = (angleOffsetX  * Math.cos(angle90)) - (angleOffsetY  * Math.sin(angle90))
-        //perpY = (angleOffsetY  * Math.cos(angle90)) + (angleOffsetX   * Math.sin(angle90))
-        let normalizedPerpendiciular = normalizeVector({
-            x: rotated.x,
-            y: rotated.y,
-        });
-        let moveFactor = -20.5;
-        let path = `M${normalizedPerpendiciular.x * moveFactor} ${normalizedPerpendiciular.y * moveFactor} ${angleOffsetX + normalizedPerpendiciular.x * moveFactor},${angleOffsetY + normalizedPerpendiciular.y * moveFactor}`
-        if (DISPLAY_DEBUG)
-            group.path(path).attr({
-                stroke:'#00ff00',
-            })
-        //console.log(`item: ${items[i]}`)
-        group
-            .text(items[i])
-            .attr({
-            })
-            .path(path)
-            .font({ 
-                size: -moveFactor, 
-                family: 'Arial' ,
-            })
-            .attr({
-                "text-color": 'yellow',
-                startOffset:"50%",
-                "text-anchor":"middle",
-                side: "left",
-                stroke: 'white'
-            })
+        let lastSegm = {
+            x: 0,
+            y: -DIAMETER / 2
+        }
+        for (i = 0; i <= segmentCount; i++){
+            let x = 0 
+            let y = -DIAMETER / 2
+            let thisAngle = degreesToRadians(angle * i)
+            let rotated = rotateVector({x: x, y: y}, thisAngle);
+            if (lastSegm){
+                // if the segment count is even i need at least 2 unique colors
+                // but if it is odd i need at least 3
+                let range = segmentCount % 2 === 0 ?
+                            COLOR_PALETTE.length % 2 === 0 ?
+                                COLOR_PALETTE.length :
+                                COLOR_PALETTE.length - 1
+                            :
+                            COLOR_PALETTE.length % 2 === 0 ?
+                                COLOR_PALETTE.length - 1 :
+                                COLOR_PALETTE.length ;
+                console.log(`segmentCount: ${segmentCount}\nrange: ${range}`)
+                
+                let path;
+                if (segmentCount == 1) {
+                    path = group.path(`M ${lastSegm.x} ${lastSegm.y}` +
+                        ` A ${DIAMETER / 2} ${DIAMETER / 2} 0 0 1 ${rotated.x} ${-rotated.y} ` + 
+                        ` A ${DIAMETER / 2} ${DIAMETER / 2} 0 0 1 ${rotated.x} ${rotated.y} Z`
+                    )
+                } else {
+                    path = group.path(`M0 0 L ${lastSegm.x} ${lastSegm.y}`+ 
+                        ` A ${DIAMETER / 2} ${DIAMETER / 2} 0 0 1 ${rotated.x} ${rotated.y} Z`)
+                }
+                path.fill(COLOR_PALETTE[(i) % (range)])
+                path.click(spin)
+            }
+            lastSegm = rotated;
+        }
+        for (i = 0; i < segmentCount; i++){
+            let x = 0 
+            let y = -DIAMETER / 2
+            let thisAngle = degreesToRadians((angle * i) + angle / 2)
+            let rotated = rotateVector({x: x, y: y}, thisAngle);
+            let angleOffsetX = rotated.x 
+            let angleOffsetY = rotated.y 
+            if(DISPLAY_DEBUG)
+                group.path(`M0 0 ${angleOffsetX},${angleOffsetY}`).fill('#AAAA00')
+
+            let angle90 = degreesToRadians(90)
+            rotated = rotateVector(rotated, angle90);
+            //perpX = (angleOffsetX  * Math.cos(angle90)) - (angleOffsetY  * Math.sin(angle90))
+            //perpY = (angleOffsetY  * Math.cos(angle90)) + (angleOffsetX   * Math.sin(angle90))
+            let normalizedPerpendiciular = normalizeVector({
+                x: rotated.x,
+                y: rotated.y,
+            });
+            let moveFactor = -20.5;
+            let path = `M${normalizedPerpendiciular.x * moveFactor} ${normalizedPerpendiciular.y * moveFactor} ${angleOffsetX + normalizedPerpendiciular.x * moveFactor},${angleOffsetY + normalizedPerpendiciular.y * moveFactor}`
+            if (DISPLAY_DEBUG)
+                group.path(path).attr({
+                    stroke:'#00ff00',
+                })
+            //console.log(`item: ${items[i]}`)
+            group
+                .text(items[i])
+                .attr({
+                })
+                .path(path)
+                .font({ 
+                    size: -moveFactor, 
+                    family: 'Arial' ,
+                })
+                .attr({
+                    "text-color": 'yellow',
+                    startOffset:"50%",
+                    "text-anchor":"middle",
+                    side: "left",
+                    stroke: 'white'
+                })
+        }
     }
-    let arrow = canvas.polygon('0,0 15,10 15,-10')
+    let arrow = canvas.polygon('-5,0 15,10 15,-10')
     arrow.fill('#000000')    
-    arrow.move(crcXTrans + diameter, crcYTrans + diameter / 2 - 10)
+    arrow.move(CRC_X_TRANS + DIAMETER - 5, CRC_Y_TRANS + DIAMETER / 2 - 10)
+
+    let middleCrcDiameter = DIAMETER * 0.1;
+    let middleCrc = group.circle(middleCrcDiameter)
+        .move(-middleCrcDiameter / 2,  -middleCrcDiameter / 2 )
+        .fill('black')
+        .click(spin)
 }
 
 function addItem(text) {
@@ -173,6 +199,7 @@ function addItem(text) {
         let span = document.createElement('span')
         let li = document.createElement('li')
         li.classList = "item"
+         
         span.classList = "value"
         span.textContent = item
         button.dataset.action = 'delete'
@@ -183,7 +210,6 @@ function addItem(text) {
         button.addEventListener("click", onDelete);
         drawSegments()
     }
-    //console.log(items)
 }
 function onDelete(e) {
     if (e.target.dataset.action === 'delete') {
@@ -239,4 +265,17 @@ function rotateVector(vec2, theta) {
         x: angleOffsetX,
         y: angleOffsetY
     }
+}
+
+function inputAreaChange(event) {
+    items.splice(0, items.length)
+    let lines = event.target.value.split('\n');
+    for (const line of lines) {
+        let trimmed = line.trim();
+        if (trimmed !== "") {
+            items.push(trimmed)
+        }
+    }
+    segmentCount = items.length
+    drawSegments()
 }

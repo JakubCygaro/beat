@@ -8,3 +8,16 @@ item {
 value {
 
 }
+input-area {
+    
+}
+.flex-container {
+  display: flex; /* or inline-flex */
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  /*align-items: baseline;*/
+}
+.flex-item {
+
+}
