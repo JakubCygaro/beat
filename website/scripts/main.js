@@ -167,8 +167,8 @@ function drawSegments() {
                 })
                 .attr({
                     "text-color": 'yellow',
-                    startOffset:"50%",
-                    "text-anchor":"middle",
+                    startOffset:"90%",
+                    "text-anchor":"end",
                     side: "end",
                     stroke: 'white',
                     fill: 'white'
@@ -176,7 +176,7 @@ function drawSegments() {
         }
     }
     let arrow = canvas.polygon('-5,0 15,10 15,-10')
-    arrow.fill('#000000')    
+    arrow.fill('red')    
     arrow.move(CRC_X_TRANS + DIAMETER - 5, CRC_Y_TRANS + DIAMETER / 2 - 10)
 
     let middleCrcDiameter = DIAMETER * 0.1;
