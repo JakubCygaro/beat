@@ -16,6 +16,15 @@ var reRotate = null;
 var spinning = false;
 var inputArea;
 
+function setup() {
+    items.push("Stary")
+    items.push("Mi")
+    items.push("Siada")
+    for(const item of items) {
+        inputArea.value += `${item}\n`
+    }
+    segmentCount = items.length;
+}
 
 SVG.on(document, 'DOMContentLoaded', async function() {
     let svg = SVG();
@@ -33,8 +42,7 @@ SVG.on(document, 'DOMContentLoaded', async function() {
     } else if (inputArea.attachEvent) {
       inputArea.attachEvent('onpropertychange', inputAreaChange);
     }
-    //addItem("dupa")
-    //addItem("siupa")
+    setup();
     drawSegments();
 })
 
@@ -43,9 +51,9 @@ async function spin() {
         return;
     } else {
         spinning = true;
+        inputArea.readOnly = true;
     }
     if (reRotate != null) {
-        //console.log(reRotate)
         group.animate({
             duration: 500,
             delay: 0,
@@ -68,18 +76,14 @@ async function spin() {
     }).rotate(rotate)
 
     reRotate = -rotate
-    //console.log(rotate)
     await new Promise(r => setTimeout(r, spinDuration));
     let segmentSize = (360 / segmentCount)
     let segm = ((rotate + ARROW_DEGREE) % 360) 
-    //console.log(`segm: ${segm}`)
     segm = 360 - segm
-    //console.log(`segmentSize: ${segmentSize}`)
-    //console.log(`segm: ${segm}`)
     segm = Math.floor(segm / segmentSize)
-    //console.log(`segm: ${segm}`)
     alert(items[segm])
     spinning = false;
+    inputArea.readOnly = false;
 }
 function drawSegments() {
     segmentCount = items.length
@@ -113,7 +117,6 @@ function drawSegments() {
                             COLOR_PALETTE.length % 2 === 0 ?
                                 COLOR_PALETTE.length - 1 :
                                 COLOR_PALETTE.length ;
-                console.log(`segmentCount: ${segmentCount}\nrange: ${range}`)
                 
                 let path;
                 if (segmentCount == 1) {
@@ -132,7 +135,7 @@ function drawSegments() {
         }
         for (i = 0; i < segmentCount; i++){
             let x = 0 
-            let y = -DIAMETER / 2
+            let y = (-DIAMETER / 2) * .95
             let thisAngle = degreesToRadians((angle * i) + angle / 2)
             let rotated = rotateVector({x: x, y: y}, thisAngle);
             let angleOffsetX = rotated.x 
@@ -142,8 +145,6 @@ function drawSegments() {
 
             let angle90 = degreesToRadians(90)
             rotated = rotateVector(rotated, angle90);
-            //perpX = (angleOffsetX  * Math.cos(angle90)) - (angleOffsetY  * Math.sin(angle90))
-            //perpY = (angleOffsetY  * Math.cos(angle90)) + (angleOffsetX   * Math.sin(angle90))
             let normalizedPerpendiciular = normalizeVector({
                 x: rotated.x,
                 y: rotated.y,
@@ -155,8 +156,7 @@ function drawSegments() {
                 group.path(path).attr({
                     stroke:'#00ff00',
                 })
-            //console.log(`item: ${items[i]}`)
-            group
+            let text = group
                 .text(items[i])
                 .attr({
                 })
@@ -167,8 +167,8 @@ function drawSegments() {
                 })
                 .attr({
                     "text-color": 'yellow',
-                    startOffset:"90%",
-                    "text-anchor":"end",
+                    startOffset:"12%",
+                    "text-anchor":"start",
                     side: "end",
                     stroke: 'white',
                     fill: 'white'
@@ -180,53 +180,12 @@ function drawSegments() {
     arrow.move(CRC_X_TRANS + DIAMETER - 5, CRC_Y_TRANS + DIAMETER / 2 - 10)
 
     let middleCrcDiameter = DIAMETER * 0.1;
-    let middleCrc = group.circle(middleCrcDiameter)
+    group.circle(middleCrcDiameter)
         .move(-middleCrcDiameter / 2,  -middleCrcDiameter / 2 )
         .fill('black')
         .click(spin)
 }
 
-function addItem(text) {
-    let item;
-    if (text) {
-        item = text
-    } else {
-        item = document.getElementById('new-item').value.toString()
-    }
-    if (item !== "") {
-        items.push(item)
-        segmentCount = items.length
-        let itemList = document.getElementById('item-list')
-        let button = document.createElement('button')
-        let span = document.createElement('span')
-        let li = document.createElement('li')
-        li.classList = "item"
-         
-        span.classList = "value"
-        span.textContent = item
-        button.dataset.action = 'delete'
-        button.textContent = "Remove"
-        li.appendChild(span)
-        li.appendChild(button)
-        itemList.appendChild(li)
-        button.addEventListener("click", onDelete);
-        drawSegments()
-    }
-}
-function onDelete(e) {
-    if (e.target.dataset.action === 'delete') {
-        let item = e.target.closest('.item')
-        let toDelete = item.firstChild.textContent;
-        //console.log(toDelete)
-        let idx = items.indexOf(toDelete);
-        //console.log(idx)
-        if(idx >= 0) {
-            items.splice(idx, 1);
-            drawSegments();
-        }
-        item.remove();
-    }
-}
 function degreesToRadians(degrees)
 {
     var pi = Math.PI;
@@ -238,26 +197,6 @@ function normalizeVector(vector) {
     return {
         x: vector.x / magnitude,
         y: vector.y / magnitude
-    }
-}
-function dotProduct(v1, v2) {
-    return v1.x * v2.x + v1.y * v2.y
-}
-function perpendiciularVector(vector) {
-    let e;
-    let dot;
-    do {
-        e = {
-            x: -Math.random(),
-            y: Math.random()
-        }
-        e = normalizeVector(e)
-        dot = dotProduct(e, vector)
-    } while(dot >= 0.5)
-    let tmp = dotProduct(dotProduct(e, vector), vector)
-    return {
-        x: e.x - tmp,
-        y: e.y - tmp
     }
 }
 function rotateVector(vec2, theta) {
@@ -281,3 +220,42 @@ function inputAreaChange(event) {
     segmentCount = items.length
     drawSegments()
 }
+//function addItem(text) {
+//    let item;
+//    if (text) {
+//        item = text
+//    } else {
+//        item = document.getElementById('new-item').value.toString()
+//    }
+//    if (item !== "") {
+//        items.push(item)
+//        segmentCount = items.length
+//        let itemList = document.getElementById('item-list')
+//        let button = document.createElement('button')
+//        let span = document.createElement('span')
+//        let li = document.createElement('li')
+//        li.classList = "item"
+//
+//        span.classList = "value"
+//        span.textContent = item
+//        button.dataset.action = 'delete'
+//        button.textContent = "Remove"
+//        li.appendChild(span)
+//        li.appendChild(button)
+//        itemList.appendChild(li)
+//        button.addEventListener("click", onDelete);
+//        drawSegments()
+//    }
+//}
+//function onDelete(e) {
+//    if (e.target.dataset.action === 'delete') {
+//        let item = e.target.closest('.item')
+//        let toDelete = item.firstChild.textContent;
+//        let idx = items.indexOf(toDelete);
+//        if(idx >= 0) {
+//            items.splice(idx, 1);
+//            drawSegments();
+//        }
+//        item.remove();
+//    }
+//}
