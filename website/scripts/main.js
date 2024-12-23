@@ -15,6 +15,9 @@ var items = [];
 var reRotate = null;
 var spinning = false;
 var inputArea;
+var container;
+var removeButton;
+var winnerIndex;
 
 function setup() {
     items.push("Stary")
@@ -36,7 +39,10 @@ SVG.on(document, 'DOMContentLoaded', async function() {
         "stroke-width":"2"
     })
     inputArea = document.getElementById('input-area')
-
+    container = document.getElementById('container')
+    removeButton = document.getElementById('remove-button')
+    removeButton.disabled = true;
+    container.style.visibility = 'hidden';
     if (inputArea.addEventListener) {
       inputArea.addEventListener('input', inputAreaChange, false);
     } else if (inputArea.attachEvent) {
@@ -52,6 +58,8 @@ async function spin() {
     } else {
         spinning = true;
         inputArea.readOnly = true;
+        container.style.visibility = 'hidden'
+        removeButton.disabled = true;
     }
     if (reRotate != null) {
         group.animate({
@@ -81,9 +89,13 @@ async function spin() {
     let segm = ((rotate + ARROW_DEGREE) % 360) 
     segm = 360 - segm
     segm = Math.floor(segm / segmentSize)
-    alert(items[segm])
+    //alert(items[segm])
     spinning = false;
     inputArea.readOnly = false;
+    document.getElementById('winner').innerHTML = items[segm]
+    winnerIndex = segm;
+    container.style.visibility = 'visible'
+    removeButton.disabled = false;
 }
 function drawSegments() {
     segmentCount = items.length
@@ -209,6 +221,7 @@ function rotateVector(vec2, theta) {
 }
 
 function inputAreaChange(event) {
+    removeButton.disabled = true;
     items.splice(0, items.length)
     let lines = event.target.value.split('\n');
     for (const line of lines) {
@@ -219,6 +232,15 @@ function inputAreaChange(event) {
     }
     segmentCount = items.length
     drawSegments()
+}
+function removeWinner() {
+    items.splice(winnerIndex, 1);
+    removeButton.disabled = true;
+    inputArea.value = "";
+    for (const item of items) {
+        inputArea.value += `${item}\n`;
+    }
+    drawSegments();
 }
 //function addItem(text) {
 //    let item;
