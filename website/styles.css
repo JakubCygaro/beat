@@ -6,9 +6,9 @@ body {
 footer {
     /*background-color: rgb(102, 102, 102) !important;*/
     border-top: solid thick rgb(55, 55, 55);
-    /*margin-top: 7%;*/
+    margin-top: 2%;
     margin-bottom: 0%;
-    position: fixed;
+    /*position: fixed;*/
     width: 100%;
     display:flex;
     bottom: 0;
